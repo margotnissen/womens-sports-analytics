@@ -1,0 +1,89 @@
+{
+  "facts": [
+    {
+      "big": "19–8",
+      "lbl": "Best record (Montréal Victoire)"
+    },
+    {
+      "big": "6",
+      "lbl": "Teams in the league"
+    }
+  ],
+  "standings": [
+    [
+      "Montréal Victoire",
+      19,
+      8,
+      0.633
+    ],
+    [
+      "Toronto Sceptres",
+      15,
+      9,
+      0.5
+    ],
+    [
+      "Minnesota Frost",
+      15,
+      11,
+      0.5
+    ],
+    [
+      "Boston Fleet",
+      15,
+      10,
+      0.5
+    ],
+    [
+      "Ottawa Charge",
+      14,
+      12,
+      0.467
+    ],
+    [
+      "New York Sirens",
+      12,
+      13,
+      0.4
+    ]
+  ],
+  "leaders": [
+    {
+      "name": "Marie-Philip Poulin",
+      "team": "Montréal Victoire",
+      "stat": "19",
+      "label": "Goals"
+    },
+    {
+      "name": "Renata Fast",
+      "team": "Toronto Sceptres",
+      "stat": "16",
+      "label": "Assists"
+    },
+    {
+      "name": "Hilary Knight",
+      "team": "Boston Fleet",
+      "stat": "29",
+      "label": "Points"
+    },
+    {
+      "name": "Carly Jackson",
+      "team": "Toronto Sceptres",
+      "stat": "0.962",
+      "label": "Save Percentage"
+    },
+    {
+      "name": "Ann-Renée Desbiens",
+      "team": "Montréal Victoire",
+      "stat": "15",
+      "label": "Wins"
+    },
+    {
+      "name": "Corinne Schroeder",
+      "team": "New York Sirens",
+      "stat": "4",
+      "label": "Shutouts"
+    }
+  ],
+  "updated_at": "2026-08-06 13:25 EDT"
+}

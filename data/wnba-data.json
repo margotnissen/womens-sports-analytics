@@ -1,4 +1,14 @@
 {
+  "facts": [
+    {
+      "big": "25–6",
+      "lbl": "Best record (Minnesota Lynx)"
+    },
+    {
+      "big": "15",
+      "lbl": "Teams in the league"
+    }
+  ],
   "east": [
     [
       "Atlanta Dream",
@@ -20,15 +30,15 @@
     ],
     [
       "Washington Mystics",
-      16,
+      17,
       12,
-      0.571
+      0.586
     ],
     [
       "Chicago Sky",
-      11,
+      12,
       19,
-      0.367
+      0.387
     ],
     [
       "Toronto Tempo",
@@ -65,14 +75,14 @@
     [
       "Dallas Wings",
       19,
-      11,
-      0.633
+      12,
+      0.613
     ],
     [
       "Los Angeles Sparks",
       11,
-      17,
-      0.393
+      18,
+      0.379
     ],
     [
       "Phoenix Mercury",
@@ -93,5 +103,25 @@
       0.182
     ]
   ],
-  "updated_at": "2026-08-05 22:12 EDT"
+  "leaders": [
+    {
+      "name": "A'ja Wilson",
+      "team": "Aces",
+      "stat": "26.8",
+      "label": "PPG"
+    },
+    {
+      "name": "Jessica Shepard",
+      "team": "Wings",
+      "stat": "11.9",
+      "label": "RPG"
+    },
+    {
+      "name": "Alyssa Thomas",
+      "team": "Mercury",
+      "stat": "8.3",
+      "label": "APG"
+    }
+  ],
+  "updated_at": "2026-08-06 13:25 EDT"
 }

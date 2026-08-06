@@ -15,10 +15,14 @@
 library(wehoop)
 library(jsonlite)
 
-# --- 1. Pull standings -------------------------------------------------
+# --- 1. Pull stats -------------------------------------------------
 # Change `year` as seasons roll over. most_recent_wnba_season() also works
-# if you'd rather not hardcode it.
-standings <- wehoop::espn_wnba_standings(year = 2026)
+standings <- wehoop::espn_wnba_standings(year = most_recent_wnba_season())
+#wnba_pbp <- wehoop::load_wnba_pbp()
+#wnba_team_box <- wehoop::load_wnba_team_box()
+player_box <- wehoop::load_wnba_player_box()
+today_wnba <- espn_wnba_scoreboard(season = most_recent_wnba_season())
+daily_scoreboard <- espn_wnba_scoreboard(season = most_recent_wnba_season())
 
 # wehoop returns team names like "Los Angeles Sparks" — trim just in case
 standings$team <- trimws(standings$team)
@@ -61,13 +65,61 @@ to_rows <- function(df) {
   })
 }
 
-out <- list(
-  east = to_rows(standings[standings$conference == "east", ]),
-  west = to_rows(standings[standings$conference == "west", ]),
-  updated_at = format(Sys.time(), "%Y-%m-%d %H:%M %Z")
+best <- standings[which.max(standings$winpercent), ]
+
+# --- Compute Stat Leaders ----------------
+# load_wnba_player_box() defaults to the current season, one row per
+# athlete per game. We aggregate to per-game averages and take the top
+# player in each category, with a minimum games-played floor so an early
+# hot streak in 2 games doesn't outrank a real season leader.
+ 
+MIN_GAMES <- 10
+ 
+season_stats <- aggregate(
+  cbind(points, rebounds, assists) ~ athlete_display_name + team_short_display_name,
+  data = player_box,
+  FUN = function(x) c(mean = mean(x, na.rm = TRUE), gp = length(x))
+)
+# `aggregate` with a matrix FUN packs mean/gp into sub-columns — unpack them
+season_stats$ppg <- season_stats$points[, "mean"]
+season_stats$gp  <- season_stats$points[, "gp"]
+season_stats$rpg <- season_stats$rebounds[, "mean"]
+season_stats$apg <- season_stats$assists[, "mean"]
+season_stats <- season_stats[season_stats$gp >= MIN_GAMES, ]
+ 
+top_by <- function(df, col, label, suffix = "") {
+  row <- df[which.max(df[[col]]), ]
+  list(
+    name = row$athlete_display_name,
+    team = row$team_short_display_name,
+    stat = paste0(sprintf("%.1f", row[[col]]), suffix),
+    label = label
+  )
+}
+ 
+leaders <- list(
+  top_by(season_stats, "ppg", "PPG"),
+  top_by(season_stats, "rpg", "RPG"),
+  top_by(season_stats, "apg", "APG")
 )
 
 # --- 4. Write JSON --------------------------------------------------------
-write_json(out, "wnba-data.json", auto_unbox = TRUE, digits = 3, pretty = TRUE)
+out <- list(
+  facts = list(
+    list(big = sprintf("%d–%d", best$wins, best$losses), lbl = paste("Best record (", best$team, ")", sep = "")),
+    list(big = as.character(nrow(standings)), lbl = "Teams in the league")
+  ),
+  east = to_rows(standings[standings$conference == "east", ]),
+  west = to_rows(standings[standings$conference == "west", ]),
+  leaders = leaders,
+  updated_at = format(Sys.time(), "%Y-%m-%d %H:%M %Z")
+)
+
+jsonlite::write_json(
+  out,
+  "data/wnba-data.json",
+  auto_unbox = TRUE,
+  pretty = TRUE
+)
 
 cat("Wrote wnba-data.json —", nrow(standings), "teams,", out$updated_at, "\n")
