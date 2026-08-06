@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Scoresheet — Women's Sports Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="style.css" rel="stylesheet">
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <div>
+      <div class="kicker">Women's Sports Performance Desk</div>
+      <div class="masthead-title">The <span id="mast-accent">Score</span>sheet</div>
+    </div>
+    <div class="masthead-meta">
+      As of Tue, Aug 5, 2026<br>
+      WNBA · NWSL · WPBL<br>
+      Sourced from league standings &amp; box scores
+    </div>
+  </div>
+
+  <div class="tabs" id="tabs"></div>
+
+  <div id="panels"></div>
+
+  <footer>
+    Figures are curated from publicly reported standings, box scores, and league stat leaders as of Aug 5, 2026 — treat as a snapshot, not a live feed.
+    Records will have shifted by the time you're reading this, especially for the four-day-old WPBL.
+  </footer>
+</div>
+
+<script>
+const DATA = {
+  wnba: {
+    color: '--wnba', color2: '--wnba-2',
+    label: 'WNBA', full: 'Women\'s National Basketball Association',
+    sub: 'Regular season standings — Eastern & Western Conference',
+    facts: [
+      {big:'25–6', lbl:'Best record (Minnesota)'},
+      {big:'26.8', lbl:'PPG scoring leader'},
+      {big:'15', lbl:'Teams in the league'},
+    ],
+    east: [
+      ['Indiana Fever',19,11,.633],
+      ['Atlanta Dream',19,11,.633],
+      ['New York Liberty',19,13,.594],
+      ['Washington Mystics',16,12,.571],
+      ['Chicago Sky',11,19,.367],
+      ['Toronto Tempo',10,20,.333],
+      ['Connecticut Sun',7,23,.233],
+    ],
+    west: [
+      ['Minnesota Lynx',25,6,.806],
+      ['Las Vegas Aces',21,9,.700],
+      ['Golden State Valkyries',21,9,.700],
+      ['Dallas Wings',19,11,.633],
+      ['Phoenix Mercury',12,20,.375],
+      ['Portland Fire',11,19,.367],
+      ['LA Sparks',11,17,.393],
+      ['Seattle Storm',6,27,.182],
+    ],
+    leaders: [
+      {name:"A'ja Wilson", team:'Las Vegas Aces', stat:'26.8', label:'PPG · League Leader'},
+      {name:'Minnesota Lynx', team:'Western Conf.', stat:'.806', label:'Best Win % In League'},
+      {name:'Golden State Valkyries', team:'Expansion franchise', stat:'21–9', label:'Standout 2nd-year record'},
+    ],
+    note: 'Minnesota is running away with the West at .806, while the East is a genuine four-team logjam at the top — Indiana and Atlanta are tied, with New York and Washington a game or two back.'
+  },
+  nwsl: {
+    color: '--nwsl', color2: '--nwsl-2',
+    label: 'NWSL', full: 'National Women\'s Soccer League',
+    sub: '2026 regular season table — top 8 clubs qualify for playoffs',
+    facts: [
+      {big:'37', lbl:'Points, league leader (Gotham FC)'},
+      {big:'12', lbl:'Goals, top scorer (Banda)'},
+      {big:'16', lbl:'Clubs, incl. 2 expansion sides'},
+    ],
+    table: [
+      [1,'Gotham FC',18,11,4,3,'+11',37,true],
+      [2,'Washington Spirit',18,11,3,4,'+13',36,true],
+      [3,'Utah Royals',18,10,3,5,'+12',33,true],
+      [4,'San Diego Wave',18,10,2,6,'+5',32,true],
+      [5,'Kansas City Current',18,9,2,7,'+4',29,true],
+      [6,'Portland Thorns',18,8,4,6,'+3',28,true],
+      [7,'NC Courage',16,7,3,6,'+3',24,true],
+      [8,'Angel City FC',16,7,2,7,'+7',23,true],
+      [9,'Seattle Reign',16,7,2,7,'-1',23,false],
+      [10,'Orlando Pride',18,7,2,9,'-4',23,false],
+      [11,'Denver Summit',16,5,5,6,'+1',20,false],
+      [12,'Boston Legacy',18,5,5,8,'-5',20,false],
+      [13,'Houston Dash',17,5,4,8,'-6',19,false],
+      [14,'Bay FC',17,5,3,9,'-6',18,false],
+      [15,'Racing Louisville',17,4,2,11,'-13',14,false],
+      [16,'Chicago Stars',17,4,0,13,'-24',12,false],
+    ],
+    leaders: [
+      {name:'Barbra Banda', team:'Orlando Pride', stat:'12G', label:'Top Goalscorer'},
+      {name:'Ann-Katrin Berger', team:'Gotham FC', stat:'7', label:'Clean Sheets · Best GK'},
+      {name:'Gotham FC', team:'Defending champions', stat:'#1', label:'Table, on +11 GD'},
+    ],
+    note: 'Gotham FC just retook first place after beating Washington Spirit head-to-head — the two are separated by a single point with 12 matches still to play. Boston Legacy and Denver Summit are competing in their inaugural NWSL seasons.'
+  },
+  wpbl: {
+    color: '--wpbl', color2: '--wpbl-2',
+    label: 'WPBL', full: 'Women\'s Pro Baseball League',
+    sub: 'Inaugural season launch tracker — first pro women\'s baseball league in the US since 1954',
+    banner: 'Day 5 of the first-ever WPBL season',
+    facts: [
+      {big:'3', lbl:'Games played, all-time'},
+      {big:'4', lbl:'Founding franchises'},
+      {big:'1954', lbl:'Last US pro women\'s league'},
+    ],
+    standings: [
+      ['San Francisco Firebells',1,0,1.000,'+8'],
+      ['Los Angeles Queens',1,0,1.000,'+2'],
+      ['New York Heights',0,1,'.000','-2'],
+      ['Boston Hunters',0,1,'.000','-8'],
+    ],
+    games: [
+      {date:'Aug 1', status:'Final', away:'Los Angeles', ascore:10, home:'New York', hscore:8, live:false},
+      {date:'Aug 2', status:'Final', away:'San Francisco', ascore:11, home:'Boston', hscore:3, live:false},
+      {date:'Aug 5', status:'Live · Top 6th', away:'Boston', ascore:2, home:'Los Angeles', hscore:12, live:true},
+    ],
+    stars: [
+      {name:'Kelsie Whitmore', role:'San Francisco Firebells · #1 overall pick', text:'The first-ever WPBL draft selection and a two-way threat — both a top bat and a pitching option, making her the face of the league\'s launch.'},
+      {name:'Mo\'ne Davis', role:'Los Angeles Queens', text:'Returning to the national spotlight over a decade after her Little League World Series breakout, now anchoring LA\'s roster.'},
+      {name:'Ayami Sato', role:'Los Angeles Queens · Pitcher', text:'Widely regarded as one of the best women\'s baseball pitchers in the world, brought over from Japan to lead LA\'s rotation.'},
+    ],
+    note: 'This is a brand-new league — three games old as of today. Every number here will look completely different by the time the first Championship Series wraps up in late September, so treat this as a launch snapshot, not a trend.'
+  }
+};
+
+const order = ['wnba','nwsl','wpbl'];
+const tabsEl = document.getElementById('tabs');
+const panelsEl = document.getElementById('panels');
+
+order.forEach((key, i) => {
+  const d = DATA[key];
+  const tab = document.createElement('div');
+  tab.className = 'tab' + (i===0 ? ' active':'');
+  tab.dataset.key = key;
+  tab.innerHTML = `<span class="dot"></span>${d.label}`;
+  tab.addEventListener('click', () => activate(key));
+  tabsEl.appendChild(tab);
+
+  const panel = document.createElement('div');
+  panel.className = 'panel' + (i===0 ? ' active':'');
+  panel.id = 'panel-' + key;
+  panel.innerHTML = renderPanel(key, d);
+  panelsEl.appendChild(panel);
+});
+
+function renderPanel(key, d){
+  let html = `
+    <div class="league-strip"><span class="swatch"></span>
+      <div><h2>${d.full}</h2><p>${d.sub}</p></div>
+    </div>
+    <div class="fact-row">
+      ${d.facts.map(f=>`<div class="fact"><div class="big">${f.big}</div><div class="lbl">${f.lbl}</div></div>`).join('')}
+    </div>
+  `;
+
+  if(key==='wnba'){
+    html += `<div class="grid-2"><div>
+      <div class="card"><h3>Eastern Conference</h3><div class="sub">W–L · Win %</div>
+        <table><tr><th>#</th><th>Team</th><th class="num">W</th><th class="num">L</th><th class="num">Pct</th></tr>
+        ${d.east.map((r,i)=>`<tr${i===3?' class="playoff-line"':''}><td class="rank">${i+1}</td><td class="team">${r[0]}</td><td class="num">${r[1]}</td><td class="num">${r[2]}</td><td class="num">${r[3].toFixed(3)}</td></tr>`).join('')}
+        </table></div>
+      <div class="card"><h3>Western Conference</h3><div class="sub">W–L · Win %</div>
+        <table><tr><th>#</th><th>Team</th><th class="num">W</th><th class="num">L</th><th class="num">Pct</th></tr>
+        ${d.west.map((r,i)=>`<tr${i===3?' class="playoff-line"':''}><td class="rank">${i+1}</td><td class="team">${r[0]}</td><td class="num">${r[1]}</td><td class="num">${r[2]}</td><td class="num">${r[3].toFixed(3)}</td></tr>`).join('')}
+        </table></div>
+      </div><div>
+      <div class="card"><h3>Stat Leaders</h3><div class="sub">Snapshot</div>
+        ${d.leaders.map(l=>`<div class="leader-card"><div><div class="leader-name">${l.name}</div><div class="leader-team">${l.team}</div></div><div class="leader-stat">${l.stat}<small>${l.label}</small></div></div>`).join('')}
+        <div class="note">${d.note}</div>
+      </div></div></div>`;
+  }
+
+  if(key==='nwsl'){
+    html += `<div class="grid-2"><div>
+      <div class="card"><h3>League Table</h3><div class="sub">Dashed line = playoff cutoff (top 8)</div>
+        <table><tr><th>#</th><th>Club</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">GD</th><th class="num">Pts</th></tr>
+        ${d.table.map(r=>`<tr${r[0]===8?' class="playoff-line"':''}><td class="rank">${r[0]}</td><td class="team">${r[1]}</td><td class="num">${r[2]}</td><td class="num">${r[3]}</td><td class="num">${r[4]}</td><td class="num">${r[5]}</td><td class="num">${r[6]}</td><td class="num">${r[7]}</td></tr>`).join('')}
+        </table></div>
+      </div><div>
+      <div class="card"><h3>Stat Leaders</h3><div class="sub">Snapshot</div>
+        ${d.leaders.map(l=>`<div class="leader-card"><div><div class="leader-name">${l.name}</div><div class="leader-team">${l.team}</div></div><div class="leader-stat">${l.stat}<small>${l.label}</small></div></div>`).join('')}
+        <div class="note">${d.note}</div>
+      </div></div></div>`;
+  }
+
+  if(key==='wpbl'){
+    html += `<div class="launch-banner">${d.banner}</div>
+      <div class="grid-2"><div>
+      <div class="card"><h3>Standings</h3><div class="sub">Through Aug 5, 2026</div>
+        <table><tr><th>#</th><th>Team</th><th class="num">W</th><th class="num">L</th><th class="num">Pct</th><th class="num">Diff</th></tr>
+        ${d.standings.map((r,i)=>`<tr><td class="rank">${i+1}</td><td class="team">${r[0]}</td><td class="num">${r[1]}</td><td class="num">${r[2]}</td><td class="num">${r[3]}</td><td class="num">${r[4]}</td></tr>`).join('')}
+        </table></div>
+      <div class="card"><h3>Game Log</h3><div class="sub">Every game in league history, so far</div>
+        <div class="game-log">
+        ${d.games.map(g=>`<div class="game${g.live?' live':''}">
+          <div><div class="date">${g.date}</div><div class="status">${g.status}</div></div>
+          <div class="matchup">${g.away} @ ${g.home}</div>
+          <div class="score">${g.ascore}–${g.hscore}</div>
+        </div>`).join('')}
+        </div></div>
+      </div><div>
+      <div class="card"><h3>Stars To Watch</h3><div class="sub">The faces of the launch</div>
+        <div class="star-grid" style="grid-template-columns:1fr;">
+        ${d.stars.map(s=>`<div class="star"><div class="name">${s.name}</div><div class="role">${s.role}</div><p>${s.text}</p></div>`).join('')}
+        </div>
+        <div class="note" style="margin-top:14px;">${d.note}</div>
+      </div>
+      </div></div>`;
+  }
+
+  return html;
+}
+
+function activate(key){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('active', t.dataset.key===key));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.toggle('active', p.id==='panel-'+key));
+  const d = DATA[key];
+  document.documentElement.style.setProperty('--accent', `var(${d.color})`);
+  document.documentElement.style.setProperty('--accent-2', `var(${d.color2})`);
+  document.getElementById('mast-accent').textContent = d.label==='WNBA' ? 'Score' : (d.label==='NWSL' ? 'Pitch' : 'Diamond');
+}
+
+activate('wnba');
+</script>
+</body>
+</html>
