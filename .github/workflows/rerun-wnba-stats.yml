@@ -1,0 +1,37 @@
+name: Update WNBA standings
+
+# Runs automatically every 6 hours, and can also be triggered manually
+# from the Actions tab on GitHub ("Run workflow" button).
+on:
+  schedule:
+    - cron: '0 */1 * * *'   # 00:00, 06:00, 12:00, 18:00 UTC — adjust as you like
+  workflow_dispatch: {}
+
+# Lets this workflow push commits back to the repo
+permissions:
+  contents: write
+
+jobs:
+  update-data:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repo
+        uses: actions/checkout@v4
+
+      - name: Set up R
+        uses: r-lib/actions/setup-r@v2
+
+      - name: Install R packages
+        run: install.packages(c("wehoop", "jsonlite"))
+        shell: Rscript {0}
+
+      - name: Run export script
+        run: Rscript wnba-stats.R
+
+      - name: Commit updated data (if changed)
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add wnba-data.json
+          git diff --staged --quiet || git commit -m "Auto-update WNBA standings"
+          git push
