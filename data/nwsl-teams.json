@@ -1,0 +1,116 @@
+[
+  {
+    "team_id": "kRQa8JOqKZ",
+    "team_name": "Angel City FC",
+    "team_short_name": "Angel City",
+    "team_abbreviation": "LA"
+  },
+  {
+    "team_id": "315VnJ759x",
+    "team_name": "Bay FC",
+    "team_short_name": "Bay FC",
+    "team_abbreviation": "BAY"
+  },
+  {
+    "team_id": "4wM4Ezg5jB",
+    "team_name": "Boston Breakers",
+    "team_short_name": "Boston",
+    "team_abbreviation": "BOS"
+  },
+  {
+    "team_id": "odMX2OJqYL",
+    "team_name": "Boston Legacy FC",
+    "team_short_name": "Boston",
+    "team_abbreviation": "BOS"
+  },
+  {
+    "team_id": "KPqjw8PQ6v",
+    "team_name": "Chicago Stars FC",
+    "team_short_name": "Chicago",
+    "team_abbreviation": "CHI"
+  },
+  {
+    "team_id": "2lqRn34qr0",
+    "team_name": "Denver Summit FC",
+    "team_short_name": "Denver",
+    "team_abbreviation": "DEN"
+  },
+  {
+    "team_id": "kRQaWa15KZ",
+    "team_name": "FC Kansas City",
+    "team_short_name": "Kansas City",
+    "team_abbreviation": "KC"
+  },
+  {
+    "team_id": "4JMAk47qKg",
+    "team_name": "Houston Dash",
+    "team_short_name": "Houston",
+    "team_abbreviation": "HOU"
+  },
+  {
+    "team_id": "4wM4rZdqjB",
+    "team_name": "Kansas City Current",
+    "team_short_name": "Kansas City",
+    "team_abbreviation": "KC"
+  },
+  {
+    "team_id": "raMyrr25d2",
+    "team_name": "NJ/NY Gotham FC",
+    "team_short_name": "Gotham FC",
+    "team_abbreviation": "NJY"
+  },
+  {
+    "team_id": "zeQZeazqKw",
+    "team_name": "North Carolina Courage",
+    "team_short_name": "North Carolina",
+    "team_abbreviation": "NC"
+  },
+  {
+    "team_id": "XVqKeVKM01",
+    "team_name": "Orlando Pride",
+    "team_short_name": "Orlando",
+    "team_abbreviation": "ORL"
+  },
+  {
+    "team_id": "Pk5LeeNqOW",
+    "team_name": "Portland Thorns FC",
+    "team_short_name": "Portland",
+    "team_abbreviation": "POR"
+  },
+  {
+    "team_id": "eV5DR6YQKn",
+    "team_name": "Racing Louisville FC",
+    "team_short_name": "Louisville",
+    "team_abbreviation": "LOU"
+  },
+  {
+    "team_id": "7VqG1lYMvW",
+    "team_name": "San Diego Wave FC",
+    "team_short_name": "San Diego",
+    "team_abbreviation": "SD"
+  },
+  {
+    "team_id": "7vQ7BBzqD1",
+    "team_name": "Seattle Reign FC",
+    "team_short_name": "Seattle",
+    "team_abbreviation": "SEA"
+  },
+  {
+    "team_id": "eV5D2w9QKn",
+    "team_name": "Utah Royals FC",
+    "team_short_name": "Utah Royals",
+    "team_abbreviation": "UTA"
+  },
+  {
+    "team_id": "aDQ0lzvQEv",
+    "team_name": "Washington Spirit",
+    "team_short_name": "Washington",
+    "team_abbreviation": "WAS"
+  },
+  {
+    "team_id": "xW5pwDBMg1",
+    "team_name": "Western New York Flash",
+    "team_short_name": "Western New York",
+    "team_abbreviation": "WNY"
+  }
+]

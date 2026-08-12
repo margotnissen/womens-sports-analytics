@@ -1,7 +1,7 @@
 {
   "facts": [
     {
-      "big": "25–6",
+      "big": "27–7",
       "lbl": "Best record (Minnesota Lynx)"
     },
     {
@@ -11,96 +11,96 @@
   ],
   "east": [
     [
-      "Atlanta Dream",
-      19,
-      11,
-      0.633
-    ],
-    [
       "Indiana Fever",
-      19,
-      11,
-      0.633
+      21,
+      12,
+      0.636
     ],
     [
-      "New York Liberty",
+      "Atlanta Dream",
+      20,
+      12,
+      0.625
+    ],
+    [
+      "Washington Mystics",
       19,
       13,
       0.594
     ],
     [
-      "Washington Mystics",
-      17,
-      12,
-      0.586
+      "New York Liberty",
+      20,
+      14,
+      0.588
     ],
     [
       "Chicago Sky",
       12,
-      19,
-      0.387
+      21,
+      0.364
     ],
     [
       "Toronto Tempo",
       10,
-      20,
-      0.333
+      22,
+      0.312
     ],
     [
       "Connecticut Sun",
-      7,
+      8,
       23,
-      0.233
+      0.258
     ]
   ],
   "west": [
     [
       "Minnesota Lynx",
-      25,
-      6,
-      0.806
-    ],
-    [
-      "Las Vegas Aces",
-      21,
-      9,
-      0.7
+      27,
+      7,
+      0.794
     ],
     [
       "Golden State Valkyries",
-      21,
+      23,
       9,
-      0.7
+      0.719
+    ],
+    [
+      "Las Vegas Aces",
+      23,
+      11,
+      0.676
     ],
     [
       "Dallas Wings",
       19,
-      12,
-      0.613
+      14,
+      0.576
+    ],
+    [
+      "Portland Fire",
+      13,
+      19,
+      0.406
     ],
     [
       "Los Angeles Sparks",
-      11,
-      18,
-      0.379
-    ],
-    [
-      "Phoenix Mercury",
       12,
       20,
       0.375
     ],
     [
-      "Portland Fire",
-      11,
-      19,
-      0.367
+      "Phoenix Mercury",
+      13,
+      22,
+      0.371
     ],
     [
       "Seattle Storm",
-      6,
-      27,
-      0.182
+      7,
+      28,
+      0.2
     ]
   ],
   "leaders": [
@@ -123,5 +123,5 @@
       "label": "APG"
     }
   ],
-  "updated_at": "2026-08-06 13:25 EDT"
+  "updated_at": "2026-08-12 18:53 EDT"
 }

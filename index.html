@@ -39,7 +39,6 @@ const DATA = {
     color2: '--wnba-2',
     label: 'WNBA',
     full: "Women's National Basketball Association",
-    sub: 'Regular season standings — Eastern & Western Conference',
     facts: [],
     east: [],
     west: [],
@@ -50,9 +49,8 @@ const DATA = {
     color2: '--nwsl-2',
     label: 'NWSL', 
     full: 'National Women\'s Soccer League',
-    sub: '2026 regular season table — top 8 clubs qualify for playoffs',
     facts: [],
-    table: [],
+    standings: [],
     leaders: []
   },
   pwhl: {
@@ -60,7 +58,6 @@ const DATA = {
     color2: '--pwhl-2',
     label: 'PWHL', 
     full: 'Professional Women\'s Hockey League',
-    sub: 'Inaugural season launch tracker — first pro women\'s baseball league in the US since 1954',
     facts: [],
     standings: [],
     leaders: []
@@ -70,7 +67,6 @@ const DATA = {
     color2: '--wpbl-2',
     label: 'WPBL', 
     full: 'Women\'s Professional Baseball League',
-    sub: 'Inaugural season launch tracker — first pro women\'s baseball league in the US since 1954',
     facts: [],
     standings: [],
     games: [],
@@ -94,6 +90,7 @@ order.forEach((key, i) => {
   const panel = document.createElement('div');
   panel.className = 'panel' + (i===0 ? ' active':'');
   panel.id = 'panel-' + key;
+  panel.innerHTML = renderPanel(key, d);
   panelsEl.appendChild(panel);
 });
  
@@ -127,10 +124,10 @@ function renderPanel(key, d){
   }
  
   if(key==='nwsl'){
-    html += `<div class="grid-2"><div>
+    html += `<div class="grid-1"><div>
       <div class="card"><h3>League Table</h3><div class="sub">Dashed line = playoff cutoff (top 8)</div>
-        <table><tr><th>#</th><th>Club</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">GD</th><th class="num">Pts</th></tr>
-        ${d.table.map(r=>`<tr${r[0]===8?' class="playoff-line"':''}><td class="rank">${r[0]}</td><td class="team">${r[1]}</td><td class="num">${r[2]}</td><td class="num">${r[3]}</td><td class="num">${r[4]}</td><td class="num">${r[5]}</td><td class="num">${r[6]}</td><td class="num">${r[7]}</td></tr>`).join('')}
+        <table><tr><th>#</th><th>Club</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">GD</th><th class="num">Pts</th><th>Form</th></tr>
+        ${d.standings.map(r=>`<tr${r.rank===8?' class="playoff-line"':''}><td class="rank">${r.rank}</td><td class="team">${r.team}</td><td class="num">${r.games_played}</td><td class="num">${r.wins}</td><td class="num">${r.draws}</td><td class="num">${r.losses}</td><td class="num">${r.point_diff}</td><td class="num">${r.points}</td><td>${(r.last_5||[]).map(formBadge).join('')}</td></tr>`).join('')}
         </table></div>
       </div><div>
       ${leaderCards(d)}
@@ -226,6 +223,25 @@ fetch("data/wnba-data.json?t=" + Date.now())
      const panel = document.getElementById("panel-pwhl");
      panel.innerHTML = renderPanel("pwhl", DATA.pwhl);
    });
+
+fetch("data/nwsl-standings.json?t=" + Date.now())
+  .then(r => {
+    if (!r.ok) {
+      throw new Error(`HTTP error ${r.status}`);
+    }
+    return r.json();
+  })
+  .then(table => {
+    DATA.nwsl.standings = table;
+    const panel = document.getElementById("panel-nwsl");
+    panel.innerHTML = renderPanel("nwsl", DATA.nwsl);
+  })
+  .catch(err => {
+    console.error("NWSL JSON error:", err);
+    DATA.nwsl.note = "Couldn't load data/nwsl-standings.json (" + err.message + ").";
+    const panel = document.getElementById("panel-nwsl");
+    panel.innerHTML = renderPanel("nwsl", DATA.nwsl);
+  });
 </script>
 </body>
 </html>

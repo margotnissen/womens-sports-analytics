@@ -1,0 +1,274 @@
+[
+  {
+    "rank": 1,
+    "team": "NJ/NY Gotham FC",
+    "games_played": 20,
+    "wins": 13,
+    "draws": 4,
+    "losses": 3,
+    "point_diff": "+14",
+    "points": 43,
+    "last_5": [
+      "W",
+      "D",
+      "W",
+      "W",
+      "W"
+    ]
+  },
+  {
+    "rank": 2,
+    "team": "Washington Spirit",
+    "games_played": 19,
+    "wins": 11,
+    "draws": 3,
+    "losses": 5,
+    "point_diff": "+12",
+    "points": 36,
+    "last_5": [
+      "W",
+      "W",
+      "W",
+      "L",
+      "L"
+    ]
+  },
+  {
+    "rank": 3,
+    "team": "Utah Royals FC",
+    "games_played": 19,
+    "wins": 10,
+    "draws": 3,
+    "losses": 6,
+    "point_diff": "+11",
+    "points": 33,
+    "last_5": [
+      "W",
+      "W",
+      "L",
+      "W",
+      "L"
+    ]
+  },
+  {
+    "rank": 4,
+    "team": "San Diego Wave FC",
+    "games_played": 19,
+    "wins": 10,
+    "draws": 2,
+    "losses": 7,
+    "point_diff": "+4",
+    "points": 32,
+    "last_5": [
+      "L",
+      "D",
+      "L",
+      "W",
+      "L"
+    ]
+  },
+  {
+    "rank": 5,
+    "team": "Portland Thorns FC",
+    "games_played": 19,
+    "wins": 9,
+    "draws": 4,
+    "losses": 6,
+    "point_diff": "+4",
+    "points": 31,
+    "last_5": [
+      "L",
+      "L",
+      "D",
+      "L",
+      "W"
+    ]
+  },
+  {
+    "rank": 6,
+    "team": "North Carolina Courage",
+    "games_played": 18,
+    "wins": 9,
+    "draws": 3,
+    "losses": 6,
+    "point_diff": "+6",
+    "points": 30,
+    "last_5": [
+      "L",
+      "L",
+      "W",
+      "W",
+      "W"
+    ]
+  },
+  {
+    "rank": 7,
+    "team": "Kansas City Current",
+    "games_played": 20,
+    "wins": 9,
+    "draws": 3,
+    "losses": 8,
+    "point_diff": "+2",
+    "points": 30,
+    "last_5": [
+      "D",
+      "L",
+      "W",
+      "D",
+      "D"
+    ]
+  },
+  {
+    "rank": 8,
+    "team": "Angel City FC",
+    "games_played": 17,
+    "wins": 7,
+    "draws": 3,
+    "losses": 7,
+    "point_diff": "+7",
+    "points": 24,
+    "last_5": [
+      "W",
+      "W",
+      "L",
+      "D",
+      "D"
+    ]
+  },
+  {
+    "rank": 9,
+    "team": "Seattle Reign FC",
+    "games_played": 17,
+    "wins": 7,
+    "draws": 3,
+    "losses": 7,
+    "point_diff": "-1",
+    "points": 24,
+    "last_5": [
+      "W",
+      "L",
+      "W",
+      "W",
+      "D"
+    ]
+  },
+  {
+    "rank": 10,
+    "team": "Denver Summit FC",
+    "games_played": 18,
+    "wins": 6,
+    "draws": 5,
+    "losses": 7,
+    "point_diff": "0",
+    "points": 23,
+    "last_5": [
+      "W",
+      "L",
+      "D",
+      "L",
+      "W"
+    ]
+  },
+  {
+    "rank": 11,
+    "team": "Orlando Pride",
+    "games_played": 19,
+    "wins": 7,
+    "draws": 2,
+    "losses": 10,
+    "point_diff": "-6",
+    "points": 23,
+    "last_5": [
+      "L",
+      "L",
+      "W",
+      "L",
+      "L"
+    ]
+  },
+  {
+    "rank": 12,
+    "team": "Boston Legacy FC",
+    "games_played": 19,
+    "wins": 5,
+    "draws": 5,
+    "losses": 9,
+    "point_diff": "-6",
+    "points": 20,
+    "last_5": [
+      "W",
+      "L",
+      "W",
+      "D",
+      "L"
+    ]
+  },
+  {
+    "rank": 13,
+    "team": "Houston Dash",
+    "games_played": 18,
+    "wins": 5,
+    "draws": 5,
+    "losses": 8,
+    "point_diff": "-6",
+    "points": 20,
+    "last_5": [
+      "D",
+      "D",
+      "W",
+      "L",
+      "D"
+    ]
+  },
+  {
+    "rank": 14,
+    "team": "Bay FC",
+    "games_played": 18,
+    "wins": 5,
+    "draws": 4,
+    "losses": 9,
+    "point_diff": "-6",
+    "points": 19,
+    "last_5": [
+      "W",
+      "L",
+      "L",
+      "L",
+      "D"
+    ]
+  },
+  {
+    "rank": 15,
+    "team": "Racing Louisville FC",
+    "games_played": 18,
+    "wins": 5,
+    "draws": 2,
+    "losses": 11,
+    "point_diff": "-11",
+    "points": 17,
+    "last_5": [
+      "D",
+      "W",
+      "L",
+      "W",
+      "W"
+    ]
+  },
+  {
+    "rank": 16,
+    "team": "Chicago Stars FC",
+    "games_played": 18,
+    "wins": 4,
+    "draws": 1,
+    "losses": 13,
+    "point_diff": "-24",
+    "points": 13,
+    "last_5": [
+      "L",
+      "L",
+      "L",
+      "L",
+      "D"
+    ]
+  }
+]
