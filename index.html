@@ -101,6 +101,11 @@ function leaderCards(d){
   </div>`;
 }
  
+function formBadge(res){
+  const color = res==='W' ? '#1f7a4d' : (res==='D' ? '#8a7b5c' : '#b0331b');
+  return `<span style="display:inline-block;width:18px;height:18px;line-height:18px;text-align:center;border-radius:3px;font-size:10px;font-weight:700;color:#fff;margin-right:2px;background:${color};">${res}</span>`;
+}
+
 function renderPanel(key, d){
   let html = `
     <div class="fact-row">
@@ -126,7 +131,7 @@ function renderPanel(key, d){
   if(key==='nwsl'){
     html += `<div class="grid-1"><div>
       <div class="card"><h3>League Table</h3><div class="sub">Dashed line = playoff cutoff (top 8)</div>
-        <table><tr><th>#</th><th>Club</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">GD</th><th class="num">Pts</th><th>Form</th></tr>
+        <table><tr><th>#</th><th>Club</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">GD</th><th class="num">Pts</th><th>Last 5</th></tr>
         ${d.standings.map(r=>`<tr${r.rank===8?' class="playoff-line"':''}><td class="rank">${r.rank}</td><td class="team">${r.team}</td><td class="num">${r.games_played}</td><td class="num">${r.wins}</td><td class="num">${r.draws}</td><td class="num">${r.losses}</td><td class="num">${r.point_diff}</td><td class="num">${r.points}</td><td>${(r.last_5||[]).map(formBadge).join('')}</td></tr>`).join('')}
         </table></div>
       </div><div>
