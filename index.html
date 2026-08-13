@@ -7,10 +7,10 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link href="style.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 </head>
 <body>
 <div class="wrap">
-
   <div class="masthead">
     <div>
       <div class="kicker">Women's Sports Performance Desk</div>
@@ -21,17 +21,13 @@
       Sourced from league standings &amp; box scores
     </div>
   </div>
-
   <div class="tabs" id="tabs"></div>
-
   <div id="panels"></div>
-
   <footer>
     Figures are curated from publicly reported standings, box scores, and league stat leaders as of Aug 5, 2026 — treat as a snapshot, not a live feed.
     Records will have shifted by the time you're reading this, especially for the four-day-old WPBL.
   </footer>
 </div>
-
 <script>
 const DATA = {
   wnba: {
@@ -115,11 +111,11 @@ function renderPanel(key, d){
  
   if(key==='wnba'){
     html += `<div class="grid-2"><div>
-      <div class="card"><h3>Eastern Conference</h3><div class="sub">W–L · Win %</div>
+      <div class="card"><h3>Eastern Conference</h3>
         <table><tr><th>#</th><th>Team</th><th class="num">W</th><th class="num">L</th><th class="num">Pct</th></tr>
         ${d.east.map((r,i)=>`<tr${i===3?' class="playoff-line"':''}><td class="rank">${i+1}</td><td class="team">${r[0]}</td><td class="num">${r[1]}</td><td class="num">${r[2]}</td><td class="num">${r[3].toFixed(3)}</td></tr>`).join('')}
         </table></div>
-      <div class="card"><h3>Western Conference</h3><div class="sub">W–L · Win %</div>
+      <div class="card"><h3>Western Conference</h3>
         <table><tr><th>#</th><th>Team</th><th class="num">W</th><th class="num">L</th><th class="num">Pct</th></tr>
         ${d.west.map((r,i)=>`<tr${i===3?' class="playoff-line"':''}><td class="rank">${i+1}</td><td class="team">${r[0]}</td><td class="num">${r[1]}</td><td class="num">${r[2]}</td><td class="num">${r[3].toFixed(3)}</td></tr>`).join('')}
         </table></div>
@@ -130,13 +126,12 @@ function renderPanel(key, d){
  
   if(key==='nwsl'){
     html += `<div class="grid-1"><div>
-      <div class="card"><h3>League Table</h3><div class="sub">Dashed line = playoff cutoff (top 8)</div>
+      <div class="card"><h3>League Table</h3>
         <table><tr><th>#</th><th>Club</th><th class="num">P</th><th class="num">W</th><th class="num">D</th><th class="num">L</th><th class="num">GD</th><th class="num">Pts</th><th>Last 5</th></tr>
         ${d.standings.map(r=>`<tr${r.rank===8?' class="playoff-line"':''}><td class="rank">${r.rank}</td><td class="team">${r.team}</td><td class="num">${r.games_played}</td><td class="num">${r.wins}</td><td class="num">${r.draws}</td><td class="num">${r.losses}</td><td class="num">${r.point_diff}</td><td class="num">${r.points}</td><td>${(r.last_5||[]).map(formBadge).join('')}</td></tr>`).join('')}
         </table></div>
-      </div><div>
-      ${leaderCards(d)}
-      </div></div>`;
+      <div class="link"><a href="nwsl-goals-explorer.html"><h3>Player G+ Radar</h3></a></div>
+      </div><div>`;
   }
 
   if(key === 'pwhl'){
@@ -238,15 +233,559 @@ fetch("data/nwsl-standings.json?t=" + Date.now())
   })
   .then(table => {
     DATA.nwsl.standings = table;
+
     const panel = document.getElementById("panel-nwsl");
     panel.innerHTML = renderPanel("nwsl", DATA.nwsl);
+
+    // Re-initialize the NWSL panel after replacing its HTML.
+    initNwslPanel();
   })
   .catch(err => {
     console.error("NWSL JSON error:", err);
-    DATA.nwsl.note = "Couldn't load data/nwsl-standings.json (" + err.message + ").";
+
+    DATA.nwsl.note =
+      "Couldn't load data/nwsl-standings.json (" +
+      err.message +
+      ").";
+
     const panel = document.getElementById("panel-nwsl");
     panel.innerHTML = renderPanel("nwsl", DATA.nwsl);
+
+    initNwslPanel();
   });
+
+let ALL_PLAYERS = [];
+let CURRENT = null;
+let CHART = null;
+let METRIC = 'goals_added_above_avg';
+
+fetch('data/nwsl-goals-added.json?t=' + Date.now())
+  .then(r => {
+    if (!r.ok) {
+      throw new Error(`HTTP error ${r.status}`);
+    }
+
+    return r.json();
+  })
+  .then(data => {
+
+    ALL_PLAYERS = normalizePlayerData(data);
+
+    updatePlayerSearchStatus();
+
+    console.log('Loaded g+ players:', ALL_PLAYERS.length);
+    console.log('First player:', ALL_PLAYERS[0]);
+  })
+  .catch(err => {
+    console.error('g+ data error:', err);
+
+    const statusEl = document.getElementById('status');
+
+    if (statusEl) {
+      statusEl.textContent =
+        "Couldn't load data/nwsl-goals-added.json (" +
+        err.message +
+        ").";
+    }
+  });
+
+function normalizePlayerData(data) {
+
+  if (!Array.isArray(data)) {
+    console.error('Expected g+ JSON to be an array:', data);
+    return [];
+  }
+
+  if (
+    data.length &&
+    Array.isArray(data[0].data)
+  ) {
+    return data
+      .filter(p => p.player_name)
+      .map(p => ({
+        ...p,
+        data: Array.isArray(p.data) ? p.data : []
+      }));
+  }
+
+  const grouped = new Map();
+
+  data
+    .filter(p => p.player_name)
+    .forEach(row => {
+
+      const key = row.player_id || row.player_name;
+
+      if (!grouped.has(key)) {
+        grouped.set(key, {
+          player_id: row.player_id,
+          player_name: row.player_name,
+          team_name: row.team_name,
+          general_position: row.general_position,
+          minutes_played: row.minutes_played,
+          data: []
+        });
+      }
+
+      grouped.get(key).data.push({
+        action_type: row.action_type,
+        goals_added_above_avg: row.goals_added_above_avg,
+        goals_added_raw: row.goals_added_raw,
+        count_actions: row.count_actions
+      });
+    });
+
+  return Array.from(grouped.values());
+}
+function initNwslPanel() {
+
+  const panel = document.getElementById('panel-nwsl');
+
+  if (!panel) {
+    console.error('NWSL panel not found');
+    return;
+  }
+
+  panel.oninput = function(e) {
+
+    if (e.target.id !== 'search') {
+      return;
+    }
+
+    handlePlayerSearch(e.target.value);
+  };
+
+
+  panel.onclick = function(e) {
+
+    const resultRow = e.target.closest('.result-row');
+
+    if (resultRow) {
+
+      const index = Number(resultRow.dataset.idx);
+      const matches = getSearchMatches(
+        document.getElementById('search')?.value || ''
+      );
+
+      if (matches[index]) {
+        selectPlayer(matches[index]);
+      }
+
+      return;
+    }
+
+    if (e.target.closest('#btn-vsavg')) {
+      setMetric('goals_added_above_avg');
+      return;
+    }
+    
+    if (e.target.closest('#btn-raw')) {
+      setMetric('goals_added_raw');
+      return;
+    }
+  };
+  updatePlayerSearchStatus();
+}
+function getSearchMatches(query) {
+
+  const q = query.trim().toLowerCase();
+
+  if (!q) {
+    return [];
+  }
+
+  return ALL_PLAYERS
+    .filter(p =>
+      (p.player_name || '')
+        .toLowerCase()
+        .includes(q)
+    )
+    .slice(0, 8);
+}
+function handlePlayerSearch(value) {
+
+  const searchEl = document.getElementById('search');
+  const resultsEl = document.getElementById('results');
+
+  if (!searchEl || !resultsEl) {
+    return;
+  }
+
+
+  const q = value.trim();
+
+
+  // Empty search
+  if (!q) {
+
+    resultsEl.classList.remove('open');
+    resultsEl.innerHTML = '';
+
+    return;
+  }
+
+
+  // Find players
+  const matches = getSearchMatches(q);
+
+
+  // No results
+  if (!matches.length) {
+
+    resultsEl.innerHTML = `
+      <div class="no-results">
+        No players matching "${escapeHtml(q)}"
+      </div>
+    `;
+
+    resultsEl.classList.add('open');
+
+    return;
+  }
+
+
+  // Results
+  resultsEl.innerHTML = matches
+    .map((p, i) => `
+      <div class="result-row" data-idx="${i}">
+        <span class="name">
+          ${escapeHtml(p.player_name)}
+        </span>
+
+        <span class="meta">
+          ${escapeHtml(p.team_name || '—')}
+          ·
+          ${escapeHtml(p.general_position || '—')}
+        </span>
+      </div>
+    `)
+    .join('');
+
+  resultsEl.classList.add('open');
+}
+function selectPlayer(p) {
+
+  if (!p) {
+    return;
+  }
+
+  CURRENT = p;
+
+
+  const searchEl = document.getElementById('search');
+  const resultsEl = document.getElementById('results');
+
+  if (searchEl) {
+    searchEl.value = p.player_name || '';
+  }
+
+  if (resultsEl) {
+    resultsEl.classList.remove('open');
+  }
+
+
+  const nameEl = document.getElementById('pv-name');
+  const teamEl = document.getElementById('pv-team');
+  const posEl = document.getElementById('pv-pos');
+  const minutesEl = document.getElementById('pv-minutes');
+  const playerViewEl = document.getElementById('player-view');
+
+
+  if (nameEl) {
+    nameEl.textContent = p.player_name || '';
+  }
+
+  if (teamEl) {
+    teamEl.textContent = p.team_name || 'Unknown team';
+  }
+
+  if (posEl) {
+    posEl.textContent = p.general_position || '—';
+  }
+
+  if (minutesEl) {
+    minutesEl.textContent =
+      p.minutes_played != null
+        ? p.minutes_played
+        : '—';
+  }
+
+  if (playerViewEl) {
+    playerViewEl.classList.add('open');
+  }
+
+
+  drawChart();
+  drawTable();
+}
+function setMetric(metric) {
+
+  METRIC = metric;
+
+
+  const vsAvgBtn = document.getElementById('btn-vsavg');
+  const rawBtn = document.getElementById('btn-raw');
+
+
+  if (vsAvgBtn) {
+    vsAvgBtn.classList.toggle(
+      'active',
+      metric === 'goals_added_above_avg'
+    );
+  }
+
+  if (rawBtn) {
+    rawBtn.classList.toggle(
+      'active',
+      metric === 'goals_added_raw'
+    );
+  }
+
+
+  if (CURRENT) {
+    drawChart();
+    drawTable();
+  }
+}
+function drawChart() {
+
+  if (
+    !CURRENT ||
+    !Array.isArray(CURRENT.data) ||
+    !CURRENT.data.length
+  ) {
+    return;
+  }
+
+
+  const validData = CURRENT.data.filter(d =>
+    d.action_type &&
+    d[METRIC] != null &&
+    !Number.isNaN(Number(d[METRIC]))
+  );
+
+
+  if (!validData.length) {
+    console.warn('No chart data for player:', CURRENT);
+    return;
+  }
+
+
+  const labels = validData.map(
+    d => d.action_type
+  );
+
+  const values = validData.map(
+    d => Number(d[METRIC])
+  );
+
+
+  const maxAbs = Math.max(
+    0.3,
+    ...values.map(v => Math.abs(v))
+  );
+
+
+  const canvas = document.getElementById('radar');
+
+  if (!canvas) {
+    return;
+  }
+
+
+  const ctx = canvas.getContext('2d');
+
+
+  if (CHART) {
+    CHART.destroy();
+    CHART = null;
+  }
+
+
+  CHART = new Chart(ctx, {
+
+    type: 'radar',
+
+    data: {
+
+      labels,
+
+      datasets: [{
+
+        label:
+          METRIC === 'goals_added_above_avg'
+            ? 'Vs. league average'
+            : 'Raw g+',
+
+        data: values,
+
+        backgroundColor:
+          'rgba(31,122,77,0.22)',
+
+        borderColor:
+          '#1F7A4D',
+
+        borderWidth: 2,
+
+        pointBackgroundColor:
+          '#1F7A4D',
+
+        pointRadius: 4
+
+      }]
+    },
+
+
+    options: {
+
+      responsive: true,
+
+      maintainAspectRatio: false,
+
+      scales: {
+
+        r: {
+
+          suggestedMin: -maxAbs,
+
+          suggestedMax: maxAbs,
+
+          ticks: {
+            display: false
+          },
+
+          grid: {
+            color: '#C9BFA9'
+          },
+
+          angleLines: {
+            color: '#C9BFA9'
+          },
+
+          pointLabels: {
+            font: {
+              family: 'IBM Plex Mono',
+              size: 11
+            },
+
+            color: '#1C2430'
+          }
+        }
+      },
+
+
+      plugins: {
+
+        legend: {
+          display: false
+        },
+
+        tooltip: {
+
+          callbacks: {
+
+            label: ctx =>
+              ` ${ctx.formattedValue}`
+
+          }
+        }
+      }
+    }
+  });
+}
+function drawTable() {
+
+  if (
+    !CURRENT ||
+    !Array.isArray(CURRENT.data)
+  ) {
+    return;
+  }
+
+
+  const rows = [...CURRENT.data]
+    .filter(d =>
+      d[METRIC] != null &&
+      !Number.isNaN(Number(d[METRIC]))
+    )
+    .sort(
+      (a, b) =>
+        Number(b[METRIC]) -
+        Number(a[METRIC])
+    );
+
+
+  const tableEl =
+    document.getElementById('stat-rows');
+
+  if (!tableEl) {
+    return;
+  }
+
+
+  tableEl.innerHTML = rows
+    .map(d => {
+
+      const value = Number(d[METRIC]);
+
+      const cls =
+        value < 0
+          ? 'negv'
+          : 'pos';
+
+
+      return `
+        <tr>
+          <td class="action">
+            ${escapeHtml(d.action_type || '—')}
+          </td>
+
+          <td class="${cls}">
+            ${value > 0 ? '+' : ''}
+            ${value.toFixed(3)}
+          </td>
+
+          <td>
+            ${d.count_actions ?? '—'}
+          </td>
+        </tr>
+      `;
+
+    })
+    .join('');
+}
+function updatePlayerSearchStatus() {
+
+  const statusEl =
+    document.getElementById('status');
+
+  if (!statusEl) {
+    return;
+  }
+
+
+  if (ALL_PLAYERS.length) {
+
+    statusEl.textContent =
+      `${ALL_PLAYERS.length} players loaded — ` +
+      `start typing a name above.`;
+
+  } else {
+
+    statusEl.textContent =
+      'Loading player data…';
+  }
+}
+function escapeHtml(value) {
+
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+initNwslPanel();
 </script>
 </body>
 </html>

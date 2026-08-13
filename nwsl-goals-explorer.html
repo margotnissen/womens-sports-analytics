@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NWSL g+ Explorer — Player Radar</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --paper: #F1ECE1;
+    --paper-dim: #E7E0D2;
+    --ink: #1C2430;
+    --ink-soft: #5B6472;
+    --line: #C9BFA9;
+    --card: #FAF7EF;
+    --nwsl: #1F7A4D;
+    --nwsl-soft: rgba(31,122,77,0.18);
+    --neg: #B0331B;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:'Inter', sans-serif; -webkit-font-smoothing:antialiased;
+  }
+  .wrap{ max-width:920px; margin:0 auto; padding:28px 20px 60px; }
+  .kicker{
+    font-family:'IBM Plex Mono', monospace; text-transform:uppercase;
+    letter-spacing:2px; font-size:11px; color:var(--ink-soft); margin-bottom:6px;
+  }
+  h1{
+    font-family:'Anton', sans-serif; font-size:clamp(28px,5vw,42px);
+    letter-spacing:.5px; text-transform:uppercase; margin:0 0 4px;
+  }
+  h1 span{ color:var(--nwsl); }
+  .lede{ font-size:13.5px; color:var(--ink-soft); max-width:60ch; margin:0 0 24px; }
+
+  .search-wrap{ position:relative; margin-bottom:22px; }
+  #search{
+    width:100%; padding:14px 16px; font-size:16px; font-family:'Inter',sans-serif;
+    border:2px solid var(--ink); background:var(--card); color:var(--ink);
+  }
+  #search:focus{ outline:none; border-color:var(--nwsl); }
+  #results{
+    position:absolute; top:calc(100% + 4px); left:0; right:0;
+    background:var(--card); border:1px solid var(--line);
+    max-height:280px; overflow-y:auto; z-index:10; display:none;
+  }
+  #results.open{ display:block; }
+  .result-row{
+    padding:10px 14px; cursor:pointer; display:flex; justify-content:space-between;
+    align-items:center; border-bottom:1px solid var(--line); font-size:13.5px;
+  }
+  .result-row:hover, .result-row.active{ background:var(--nwsl-soft); }
+  .result-row .name{ font-weight:700; }
+  .result-row .meta{ font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--ink-soft); }
+  .no-results{ padding:14px; font-size:13px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace; }
+
+  #status{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--ink-soft); margin-bottom:18px;
+  }
+
+  #player-view{ display:none; }
+  #player-view.open{ display:block; }
+
+  .player-header{
+    display:flex; justify-content:space-between; align-items:flex-end; flex-wrap:wrap; gap:12px;
+    border-bottom:3px solid var(--ink); padding-bottom:14px; margin-bottom:20px;
+  }
+  .player-header h2{
+    font-family:'Anton',sans-serif; font-size:28px; text-transform:uppercase; margin:0 0 4px;
+  }
+  .player-meta{ font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--ink-soft); }
+  .player-meta b{ color:var(--ink); }
+
+  .toggle-row{ display:flex; gap:8px; margin-bottom:18px; }
+  .toggle-btn{
+    font-family:'IBM Plex Mono',monospace; font-size:11.5px; text-transform:uppercase;
+    letter-spacing:.5px; padding:8px 14px; border:2px solid var(--ink); background:var(--card);
+    cursor:pointer; color:var(--ink);
+  }
+  .toggle-btn.active{ background:var(--nwsl); border-color:var(--nwsl); color:#fff; }
+
+  .chart-card{
+    background:var(--card); border:1px solid var(--line); padding:20px;
+    display:grid; grid-template-columns: 1.1fr 0.9fr; gap:24px; align-items:center;
+  }
+  @media (max-width:680px){ .chart-card{ grid-template-columns:1fr; } }
+  .chart-box{ position:relative; height:340px; }
+
+  table.stat-table{ width:100%; border-collapse:collapse; font-size:12.5px; }
+  .stat-table th{
+    text-align:left; font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:10px;
+    text-transform:uppercase; letter-spacing:.5px; color:var(--ink-soft);
+    border-bottom:2px solid var(--ink); padding:6px 4px;
+  }
+  .stat-table td{ padding:6px 4px; border-bottom:1px solid var(--line); font-family:'IBM Plex Mono',monospace; }
+  .stat-table td.pos{ color:var(--nwsl); font-weight:700; }
+  .stat-table td.negv{ color:var(--neg); font-weight:700; }
+  .stat-table td.action{ font-family:'Inter',sans-serif; font-weight:600; color:var(--ink); }
+
+  .note{
+    font-size:11.5px; color:var(--ink-soft); font-family:'IBM Plex Mono',monospace;
+    border-left:3px solid var(--nwsl); padding:8px 12px; margin-top:18px; background:var(--paper-dim);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="kicker">NWSL · Goals Added (g+)</div>
+  <h1>Player g+ <span>Radar</span></h1>
+  <p class="lede">Search any NWSL player to see how their on-ball actions — dribbling, fouling, interrupting, passing, receiving, shooting — compare to league average, measured in goals added.</p>
+
+  <div class="search-wrap">
+    <input type="text" id="search" placeholder="Search a player name…" autocomplete="off">
+    <div id="results"></div>
+  </div>
+  <div id="status">Loading player data…</div>
+
+  <div id="player-view">
+    <div class="player-header">
+      <div>
+        <h2 id="pv-name"></h2>
+        <div class="player-meta"><b id="pv-team"></b> · <span id="pv-pos"></span> · <span id="pv-minutes"></span> minutes</div>
+      </div>
+    </div>
+
+    <div class="toggle-row">
+      <button class="toggle-btn active" id="btn-vsavg">Vs. League Average</button>
+      <button class="toggle-btn" id="btn-raw">Raw g+</button>
+    </div>
+
+    <div class="chart-card">
+      <div class="chart-box"><canvas id="radar"></canvas></div>
+      <div>
+        <table class="stat-table">
+          <tr><th>Action</th><th>Value</th><th># Actions</th></tr>
+          <tbody id="stat-rows"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="note">Positive values mean the player adds more expected goals through that action than a league-average NWSL player in the same amount of playing time; negative means they cost their team goals relative to average. "Raw g+" is the player's total goals added in that category, unadjusted for role or minutes.</div>
+  </div>
+</div>
+
+<script>
+let ALL_PLAYERS = [];
+let CURRENT = null;
+let CHART = null;
+let METRIC = 'goals_added_above_avg';
+
+const searchEl = document.getElementById('search');
+const resultsEl = document.getElementById('results');
+const statusEl = document.getElementById('status');
+const playerViewEl = document.getElementById('player-view');
+
+fetch('data/nwsl-goals-added.json?t=' + Date.now())
+  .then(r => {
+    if (!r.ok) throw new Error(`HTTP error ${r.status}`);
+    return r.json();
+  })
+  .then(data => {
+    ALL_PLAYERS = data.filter(p => p.player_name);
+    statusEl.textContent = `${ALL_PLAYERS.length} players loaded — start typing a name above.`;
+  })
+  .catch(err => {
+    console.error('g+ data error:', err);
+    statusEl.textContent = "Couldn't load data/nwsl-goals-added.json (" + err.message + ") — make sure it's next to this HTML file.";
+  });
+
+searchEl.addEventListener('input', () => {
+  const q = searchEl.value.trim().toLowerCase();
+  if (!q) { resultsEl.classList.remove('open'); resultsEl.innerHTML = ''; return; }
+
+  const matches = ALL_PLAYERS
+    .filter(p => (p.player_name || '').toLowerCase().includes(q))
+    .slice(0, 8);
+
+  if (!matches.length) {
+    resultsEl.innerHTML = `<div class="no-results">No players matching "${searchEl.value}"</div>`;
+    resultsEl.classList.add('open');
+    return;
+  }
+
+  resultsEl.innerHTML = matches.map((p, i) => `
+    <div class="result-row" data-idx="${i}">
+      <span class="name">${p.player_name}</span>
+      <span class="meta">${p.team_name || '—'} · ${p.general_position || '—'}</span>
+    </div>
+  `).join('');
+  resultsEl.classList.add('open');
+
+  resultsEl.querySelectorAll('.result-row').forEach((row, i) => {
+    row.addEventListener('click', () => selectPlayer(matches[i]));
+  });
+});
+
+document.addEventListener('click', (e) => {
+  if (!e.target.closest('.search-wrap')) resultsEl.classList.remove('open');
+});
+
+function selectPlayer(p){
+  CURRENT = p;
+  searchEl.value = p.player_name;
+  resultsEl.classList.remove('open');
+
+  document.getElementById('pv-name').textContent = p.player_name;
+  document.getElementById('pv-team').textContent = p.team_name || 'Unknown team';
+  document.getElementById('pv-pos').textContent = p.general_position || '—';
+  document.getElementById('pv-minutes').textContent = p.minutes_played != null ? p.minutes_played : '—';
+
+  playerViewEl.classList.add('open');
+  drawChart();
+  drawTable();
+}
+
+document.getElementById('btn-vsavg').addEventListener('click', () => setMetric('goals_added_above_avg'));
+document.getElementById('btn-raw').addEventListener('click', () => setMetric('goals_added_raw'));
+
+function setMetric(m){
+  METRIC = m;
+  document.getElementById('btn-vsavg').classList.toggle('active', m==='goals_added_above_avg');
+  document.getElementById('btn-raw').classList.toggle('active', m==='goals_added_raw');
+  if (CURRENT) { drawChart(); drawTable(); }
+}
+
+function drawChart(){
+  if (!CURRENT || !CURRENT.data) return;
+  const labels = CURRENT.data.map(d => d.action_type);
+  const values = CURRENT.data.map(d => d[METRIC]);
+  const maxAbs = Math.max(0.3, ...values.map(v => Math.abs(v)));
+
+  const ctx = document.getElementById('radar').getContext('2d');
+  if (CHART) CHART.destroy();
+  CHART = new Chart(ctx, {
+    type: 'radar',
+    data: {
+      labels,
+      datasets: [{
+        label: METRIC === 'goals_added_above_avg' ? 'Vs. league average' : 'Raw g+',
+        data: values,
+        backgroundColor: 'rgba(31,122,77,0.22)',
+        borderColor: '#1F7A4D',
+        borderWidth: 2,
+        pointBackgroundColor: '#1F7A4D',
+        pointRadius: 4,
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        r: {
+          suggestedMin: -maxAbs,
+          suggestedMax: maxAbs,
+          ticks: { display: false },
+          grid: { color: '#C9BFA9' },
+          angleLines: { color: '#C9BFA9' },
+          pointLabels: { font: { family: 'IBM Plex Mono', size: 11 }, color: '#1C2430' }
+        }
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            label: (ctx) => ` ${ctx.formattedValue}`
+          }
+        }
+      }
+    }
+  });
+}
+
+function drawTable(){
+  if (!CURRENT || !CURRENT.data) return;
+  const rows = [...CURRENT.data].sort((a,b) => b[METRIC] - a[METRIC]);
+  document.getElementById('stat-rows').innerHTML = rows.map(d => {
+    const v = d[METRIC];
+    const cls = v < 0 ? 'negv' : 'pos';
+    return `<tr><td class="action">${d.action_type}</td><td class="${cls}">${v > 0 ? '+' : ''}${v.toFixed(3)}</td><td>${d.count_actions}</td></tr>`;
+  }).join('');
+}
+</script>
+</body>
+</html>

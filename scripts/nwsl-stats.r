@@ -16,10 +16,14 @@ asa_client <- AmericanSoccerAnalysis$new()
 
 nwsl_teams <- asa_client$get_teams(leagues = "nwsl")
 nwsl_games <- asa_client$get_games(leagues = "nwsl", seasons = "2026")
+nwsl_players <- asa_client$get_players(leagues = "nwsl")
 
 # --- Team ID -> name lookup, single table reused for both sides -------
 team_lookup <- nwsl_teams |>
   select(team_id, team_name)
+
+player_lookup <- nwsl_players |>
+  select(player_id, player_name)
 
 # --- Attach readable names directly onto the game rows ----------------
 # (this replaces your two separate home_teams/away_teams lookups — one
@@ -111,6 +115,11 @@ form_by_team <- bind_rows(home_results, away_results) |>
   summarise(form = list(result), .groups = "drop")
 
 form_lookup <- setNames(form_by_team$form, form_by_team$team)
+
+dir.create("data", showWarnings = FALSE)
+write_json(goals_added, "data/nwsl-goals-added.json", auto_unbox = TRUE, pretty = TRUE)
+
+cat("Wrote data/nwsl-goals-added.json —", nrow(goals_added), "players\n")
 
 # --- Shape into named row objects: rank, team, games_played, wins, ------
 #        draws, losses, point_diff, points, last_5
